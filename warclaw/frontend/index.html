@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WarClaw — EdgeRunner AI Naval LAN OS</title>
+  <link rel="stylesheet" href="/static/css/app.css" />
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ══ HEADER ══════════════════════════════════════════════════ -->
+  <header id="header">
+    <div class="logo-mark">
+      <div class="logo-icon">
+        <div class="logo-claw">⬡</div>
+      </div>
+      <div class="logo-text">
+        <div class="logo-name">WARCLAW</div>
+        <div class="logo-brand">EdgeRunner AI · Naval LAN OS</div>
+      </div>
+    </div>
+
+    <div class="header-divider"></div>
+
+    <div id="header-status">
+      <div class="status-pill">
+        <div class="status-dot online" id="ai-status-dot"></div>
+        <span id="ai-status-label">CHECKING...</span>
+      </div>
+
+      <div class="status-pill">
+        <div class="status-dot online"></div>
+        <span>LAN OFFLINE</span>
+      </div>
+
+      <div id="system-time" style="font-family:var(--font-mono);font-size:12px;color:var(--text-muted);">
+        --:--:-- UTC
+      </div>
+    </div>
+  </header>
+
+  <!-- ══ SIDEBAR ═════════════════════════════════════════════════ -->
+  <nav id="sidebar">
+    <div class="nav-section-label">Navigation</div>
+
+    <div class="nav-item" data-view="dashboard">
+      <span class="nav-icon">◉</span>
+      <span>Dashboard</span>
+    </div>
+
+    <div class="nav-item" data-view="chat">
+      <span class="nav-icon">⬡</span>
+      <span>AI Assistant</span>
+    </div>
+
+    <div class="nav-section-label">Ship Systems</div>
+
+    <div class="nav-item" data-view="lan">
+      <span class="nav-icon">◈</span>
+      <span>LAN Monitor</span>
+      <span class="nav-badge" id="lan-host-count">0</span>
+    </div>
+
+    <div class="nav-section-label">Operations</div>
+
+    <div class="nav-item" data-view="apps">
+      <span class="nav-icon">⊕</span>
+      <span>App Factory</span>
+    </div>
+
+    <div class="nav-item" data-view="hardware">
+      <span class="nav-icon">⚙</span>
+      <span>Hardware / Model</span>
+    </div>
+
+    <div id="sidebar-footer">
+      <div class="sidebar-footer-text">
+        WarClaw v1.0.0<br>
+        EdgeRunner AI<br>
+        100% LOCAL · NO CLOUD
+      </div>
+    </div>
+  </nav>
+
+  <!-- ══ MAIN ════════════════════════════════════════════════════ -->
+  <main id="main">
+
+    <!-- ── DASHBOARD ──────────────────────────────────────────── -->
+    <div class="view" id="view-dashboard">
+      <div class="view-header">
+        <span class="nav-icon">◉</span>
+        <span class="view-title">DASHBOARD</span>
+        <span class="view-subtitle">Ship LAN Operating Status</span>
+      </div>
+
+      <div class="dashboard-grid">
+
+        <div class="stat-card">
+          <div class="stat-label">AI Status</div>
+          <div class="stat-value blue" id="dash-ai-status">CHECKING</div>
+          <div class="stat-sub" id="stat-model">—</div>
+        </div>
+
+        <div class="stat-card green">
+          <div class="stat-label">Generated Apps</div>
+          <div class="stat-value green" id="stat-apps">0</div>
+          <div class="stat-sub">Ship applications</div>
+        </div>
+
+        <div class="stat-card amber">
+          <div class="stat-label">Hosts Discovered</div>
+          <div class="stat-value amber" id="dash-host-count">—</div>
+          <div class="stat-sub">Run LAN scan to discover</div>
+        </div>
+
+        <div class="stat-card cyan">
+          <div class="stat-label">Active Protocols</div>
+          <div class="stat-value" style="color:var(--accent-cyan);" id="dash-protocols">—</div>
+          <div class="stat-sub">NMEA · MODBUS · IEC 61162</div>
+        </div>
+
+        <div class="card" style="grid-column: 1 / -1;">
+          <div class="card-title">QUICK ACTIONS</div>
+          <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;">
+            <button class="btn btn-primary" onclick="showView('lan'); runLanScan()">⬡ Scan Ship LAN</button>
+            <button class="btn" onclick="showView('chat')">⬡ Open AI Assistant</button>
+            <button class="btn" onclick="showView('apps')">⊕ Create New App</button>
+            <button class="btn" onclick="showView('hardware')">⚙ Manage AI Model</button>
+          </div>
+        </div>
+
+        <div class="card" style="grid-column: 1 / -1;">
+          <div class="card-title">SYSTEM OVERVIEW</div>
+          <div style="font-size:12px;color:var(--text-secondary);line-height:1.8;">
+            <div>◈ <strong>WarClaw</strong> is running 100% locally on this ship's LAN. No internet connection required.</div>
+            <div>◈ AI inference is powered by <strong>llama.cpp</strong> — all data stays on this server.</div>
+            <div>◈ LAN monitoring covers NMEA 0183/2000, IEC 61162, MODBUS TCP, and generic TCP/UDP services.</div>
+            <div>◈ Generated apps run as live FastAPI routes accessible to all terminals on the LAN.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── AI CHAT ─────────────────────────────────────────────── -->
+    <div class="view" id="view-chat">
+      <div class="view-header">
+        <span class="nav-icon">⬡</span>
+        <span class="view-title">AI ASSISTANT</span>
+        <span class="view-subtitle">
+          <span id="ws-status" style="color:var(--text-muted);">CONNECTING...</span>
+        </span>
+        <div class="view-actions">
+          <button class="btn" id="chat-clear-btn">⊗ Clear</button>
+        </div>
+      </div>
+
+      <div class="chat-hints" style="padding:8px 24px 0;">
+      </div>
+
+      <div id="chat-messages"></div>
+
+      <div id="chat-input-area">
+        <div class="chat-input-row">
+          <textarea
+            id="chat-input"
+            placeholder="Ask WarClaw anything about ship systems, NMEA data, or building apps..."
+            rows="2"
+          ></textarea>
+          <button class="btn btn-primary" id="chat-send-btn" style="height:44px;padding:0 18px;">
+            ▶ SEND
+          </button>
+        </div>
+        <div class="text-muted" style="margin-top:6px;">Shift+Enter for newline &nbsp;·&nbsp; Enter to send</div>
+      </div>
+    </div>
+
+    <!-- ── LAN MONITOR ─────────────────────────────────────────── -->
+    <div class="view" id="view-lan">
+      <div class="view-header">
+        <span class="nav-icon">◈</span>
+        <span class="view-title">LAN MONITOR</span>
+        <span class="view-subtitle">Discover &amp; integrate ship systems</span>
+        <div class="view-actions">
+          <input type="text" id="lan-network-input"
+            placeholder="192.168.1.0/24 (auto-detect)"
+            style="width:200px;height:32px;padding:4px 10px;font-size:12px;" />
+          <button class="btn btn-primary" id="lan-scan-btn">⬡ SCAN LAN</button>
+        </div>
+      </div>
+
+      <div class="lan-body" style="flex:1;display:grid;grid-template-columns:1fr 300px;overflow:hidden;">
+
+        <div style="overflow-y:auto;display:flex;flex-direction:column;">
+          <div id="lan-recs"></div>
+          <div id="lan-host-list" style="padding:0 16px 16px;display:flex;flex-direction:column;gap:10px;">
+            <div id="lan-empty" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:300px;gap:12px;color:var(--text-muted);">
+              <div class="empty-icon">◈</div>
+              <div>Click SCAN LAN to discover ship systems on this network</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="lan-sidebar" style="border-left:1px solid var(--border);background:var(--bg-secondary);padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:16px;">
+          <div id="lan-scan-stats">
+            <div class="card-title">LAN DISCOVERY</div>
+            <div class="text-muted" style="font-size:11px;line-height:1.7;">
+              Run a scan to discover:<br>
+              ◈ NMEA 0183 navigation feeds<br>
+              ◈ IEC 61162 bridge systems<br>
+              ◈ MODBUS industrial sensors<br>
+              ◈ HTTP interfaces &amp; APIs<br>
+              ◈ Serial-to-TCP gateways
+            </div>
+          </div>
+
+          <div>
+            <div class="card-title">LIVE STREAM</div>
+            <div id="lan-stream-info" class="text-muted" style="font-size:11px;margin-bottom:8px;">
+              Click ▶ Stream on a discovered NMEA host
+            </div>
+            <div id="stream-panel" style="min-height:80px;">[no stream active]</div>
+            <button class="btn btn-danger" id="lan-stop-stream-btn" style="margin-top:8px;font-size:11px;">
+              ⊗ Stop Stream
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── APP FACTORY ─────────────────────────────────────────── -->
+    <div class="view" id="view-apps">
+      <div class="view-header">
+        <span class="nav-icon">⊕</span>
+        <span class="view-title">APP FACTORY</span>
+        <span class="view-subtitle">AI-generated full-stack ship applications</span>
+      </div>
+
+      <div class="apps-body" style="flex:1;display:grid;grid-template-columns:340px 1fr;overflow:hidden;">
+
+        <div id="app-create-panel" style="border-right:1px solid var(--border);padding:20px;overflow-y:auto;background:var(--bg-secondary);">
+          <div class="card-title">CREATE NEW APP</div>
+
+          <div class="form-group">
+            <label>App Name</label>
+            <input type="text" id="app-name-input" placeholder="Navigation Dashboard" />
+          </div>
+
+          <div class="form-group">
+            <label>Description</label>
+            <textarea id="app-desc-input" placeholder="Describe what this app should do..." rows="4"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Integration Context (optional)</label>
+            <textarea id="app-context-input"
+              placeholder="e.g. NMEA data at 192.168.1.10:10110, MODBUS at 192.168.1.20:502"
+              rows="3"></textarea>
+          </div>
+
+          <button class="btn btn-primary" id="gen-app-btn" style="width:100%;justify-content:center;padding:10px;">
+            ⚡ GENERATE APP
+          </button>
+
+          <div class="progress-bar" style="margin-top:10px;">
+            <div class="progress-fill" id="gen-progress-fill" style="width:0%;"></div>
+          </div>
+
+          <div id="gen-status" class="text-muted" style="font-size:11px;margin-top:8px;min-height:16px;"></div>
+
+          <div style="margin-top:20px;">
+            <div class="card-title">QUICK TEMPLATES</div>
+            <div id="app-templates" style="display:flex;flex-direction:column;gap:6px;margin-top:8px;"></div>
+          </div>
+        </div>
+
+        <div id="app-list-panel" style="padding:16px;overflow-y:auto;">
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── HARDWARE ─────────────────────────────────────────────── -->
+    <div class="view" id="view-hardware">
+      <div class="view-header">
+        <span class="nav-icon">⚙</span>
+        <span class="view-title">HARDWARE &amp; MODEL</span>
+        <span class="view-subtitle">Server capabilities and llama.cpp model management</span>
+        <div class="view-actions">
+          <button class="btn" id="hw-refresh-btn">↺ Refresh</button>
+        </div>
+      </div>
+
+      <div class="hw-body" style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:20px;overflow-y:auto;align-content:start;">
+        <div class="card" id="hw-profile">
+          <div class="text-muted">Loading hardware profile...</div>
+        </div>
+        <div class="card" id="hw-models">
+          <div class="text-muted">Scanning models directory...</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<script src="/static/js/app.js"></script>
+<script src="/static/js/chat.js"></script>
+<script src="/static/js/lan.js"></script>
+<script src="/static/js/apps.js"></script>
+<script src="/static/js/hardware.js"></script>
+
+</body>
+</html>

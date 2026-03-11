@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+# ═══════════════════════════════════════════════════════════════
+# WarClaw — Start Script
+# ═══════════════════════════════════════════════════════════════
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+WARCLAW_DIR="$(dirname "$SCRIPT_DIR")"
+VENV_DIR="$WARCLAW_DIR/.venv"
+
+GREEN='\033[0;32m'; YELLOW='\033[1;33m'; RED='\033[0;31m'
+CYAN='\033[0;36m'; BLUE='\033[0;34m'; NC='\033[0m'
+
+# ── Check virtual env ────────────────────────────────────────────
+if [ ! -f "$VENV_DIR/bin/activate" ]; then
+  echo -e "${RED}[✗]${NC} Virtual environment not found. Run ./scripts/setup.sh first."
+  exit 1
+fi
+
+source "$VENV_DIR/bin/activate"
+
+# ── Configuration from env or defaults ──────────────────────────
+HOST="${WARCLAW_HOST:-0.0.0.0}"
+PORT="${WARCLAW_PORT:-7070}"
+WORKERS="${WARCLAW_WORKERS:-1}"
+LOG_LEVEL="${WARCLAW_LOG:-info}"
+MODEL="${WARCLAW_MODEL:-}"
+
+# ── Detect LAN IP for display ────────────────────────────────────
+LAN_IP=$(hostname -I 2>/dev/null | awk '{print $1}' || echo "localhost")
+
+# ── Banner ───────────────────────────────────────────────────────
+echo -e "${CYAN}"
+echo "  ╔══════════════════════════════════════════════════════╗"
+echo "  ║          WARCLAW — EdgeRunner AI Naval LAN OS        ║"
+echo "  ║              100% LOCAL · OFFLINE CAPABLE            ║"
+echo "  ╚══════════════════════════════════════════════════════╝"
+echo -e "${NC}"
+echo -e "  ${GREEN}Dashboard:${NC}   http://${LAN_IP}:${PORT}"
+echo -e "  ${GREEN}API Docs:${NC}    http://${LAN_IP}:${PORT}/api/docs"
+echo -e "  ${BLUE}Interface:${NC}   ${HOST}:${PORT}"
+if [ -n "$MODEL" ]; then
+  echo -e "  ${GREEN}Model:${NC}       ${MODEL}"
+else
+  echo -e "  ${YELLOW}Model:${NC}       Not set — load via Hardware tab in UI"
+fi
+echo ""
+
+# ── Change to backend parent dir so package imports resolve ─────
+cd "$WARCLAW_DIR"
+
+# ── Start uvicorn ────────────────────────────────────────────────
+exec python -m uvicorn backend.main:app \
+  --host "$HOST" \
+  --port "$PORT" \
+  --workers "$WORKERS" \
+  --log-level "$LOG_LEVEL" \
+  --ws websockets
