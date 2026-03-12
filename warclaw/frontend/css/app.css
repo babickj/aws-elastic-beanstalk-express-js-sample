@@ -1023,3 +1023,31 @@ label {
   gap: 6px;
   margin-top: 6px;
 }
+
+/* ── Mission Log / Events view ────────────────────────────────── */
+#view-events {
+  display: flex;
+  flex-direction: column;
+}
+
+#events-feed {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  background: var(--bg-primary);
+}
+
+.event-row {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(26, 74, 122, 0.4);
+  line-height: 1.5;
+}
+
+.event-row:hover {
+  background: rgba(0, 170, 255, 0.04);
+}

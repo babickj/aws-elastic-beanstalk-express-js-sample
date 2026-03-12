@@ -110,12 +110,108 @@ def _decode_vhw(fields: list[str]) -> dict:
         return {"type": "Water Speed/Heading", "error": str(e)}
 
 
+def _decode_vtg(fields: list[str]) -> dict:
+    """Track Made Good and Ground Speed."""
+    try:
+        track_true = float(fields[1]) if fields[1] else None
+        track_mag = float(fields[3]) if fields[3] else None
+        speed_knots = float(fields[5]) if fields[5] else None
+        speed_kmh = float(fields[7]) if fields[7] else None
+        return {
+            "type": "Track/Ground Speed",
+            "track_true_deg": track_true,
+            "track_magnetic_deg": track_mag,
+            "speed_knots": speed_knots,
+            "speed_kmh": speed_kmh,
+        }
+    except Exception as e:
+        return {"type": "Track/Ground Speed", "error": str(e)}
+
+
+def _decode_gll(fields: list[str]) -> dict:
+    """Geographic Position — Latitude/Longitude."""
+    try:
+        def dm_to_dd(dm, direction):
+            if not dm:
+                return None
+            dot = dm.index(".")
+            deg = float(dm[:dot - 2])
+            minutes = float(dm[dot - 2:])
+            dd = deg + minutes / 60
+            if direction in ("S", "W"):
+                dd = -dd
+            return round(dd, 6)
+
+        lat = dm_to_dd(fields[1], fields[2]) if len(fields) > 2 else None
+        lon = dm_to_dd(fields[3], fields[4]) if len(fields) > 4 else None
+        status = "Active" if len(fields) > 6 and fields[6] == "A" else "Void"
+        return {"type": "Geographic Position", "latitude": lat, "longitude": lon, "status": status}
+    except Exception as e:
+        return {"type": "Geographic Position", "error": str(e)}
+
+
+def _decode_zda(fields: list[str]) -> dict:
+    """Time and Date."""
+    try:
+        utc = fields[1] if fields[1] else None
+        day = int(fields[2]) if fields[2] else None
+        month = int(fields[3]) if fields[3] else None
+        year = int(fields[4]) if fields[4] else None
+        time_str = f"{utc[:2]}:{utc[2:4]}:{utc[4:]}" if utc and len(utc) >= 6 else utc
+        return {"type": "UTC Time/Date", "utc": time_str, "day": day, "month": month, "year": year}
+    except Exception as e:
+        return {"type": "UTC Time/Date", "error": str(e)}
+
+
+def _decode_mwv(fields: list[str]) -> dict:
+    """Wind Speed and Angle."""
+    try:
+        angle = float(fields[1]) if fields[1] else None
+        reference = "True" if fields[2] == "T" else "Relative"
+        speed = float(fields[3]) if fields[3] else None
+        units = {"K": "km/h", "M": "m/s", "N": "knots"}.get(fields[4], fields[4]) if len(fields) > 4 else "?"
+        return {
+            "type": "Wind",
+            "wind_angle_deg": angle,
+            "reference": reference,
+            "wind_speed": speed,
+            "speed_units": units,
+        }
+    except Exception as e:
+        return {"type": "Wind", "error": str(e)}
+
+
+def _decode_mtw(fields: list[str]) -> dict:
+    """Mean Temperature of Water."""
+    try:
+        temp = float(fields[1]) if fields[1] else None
+        return {"type": "Water Temperature", "temperature_c": temp}
+    except Exception as e:
+        return {"type": "Water Temperature", "error": str(e)}
+
+
+def _decode_rot(fields: list[str]) -> dict:
+    """Rate of Turn."""
+    try:
+        rot = float(fields[1]) if fields[1] else None
+        status = "Valid" if len(fields) > 2 and fields[2] == "A" else "Invalid"
+        return {"type": "Rate of Turn", "rate_deg_per_min": rot, "status": status}
+    except Exception as e:
+        return {"type": "Rate of Turn", "error": str(e)}
+
+
 _DECODERS = {
     "GGA": _decode_gga,
+    "GLL": _decode_gll,
     "RMC": _decode_rmc,
+    "VTG": _decode_vtg,
     "HDT": _decode_hdt,
     "DBT": _decode_dbt,
     "VHW": _decode_vhw,
+    "ZDA": _decode_zda,
+    "MWV": _decode_mwv,
+    "MTW": _decode_mtw,
+    "ROT": _decode_rot,
 }
 
 

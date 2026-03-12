@@ -1,15 +1,18 @@
 """
 LAN monitoring endpoints — scan, discover, and stream live protocol data.
 """
+import ipaddress
 import json
 import logging
 import time
 
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query, HTTPException
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import Optional
 
 from ..services.lan_monitor import scan_network, stream_protocol_traffic
+from ..services.mission_log import emit as log_event
 from ..protocols.modbus import probe_modbus
 
 log = logging.getLogger("warclaw.lan")
@@ -22,8 +25,22 @@ async def lan_scan(network: Optional[str] = Query(None, description="CIDR networ
     Perform a full LAN discovery scan.
     Finds hosts, identifies services, and returns integration recommendations.
     """
+    # Validate CIDR if supplied
+    if network:
+        try:
+            ipaddress.IPv4Network(network, strict=False)
+        except ValueError:
+            raise HTTPException(status_code=400, detail=f"Invalid CIDR notation: {network}")
+
     log.info("LAN scan requested, network=%s", network or "auto-detect")
+    log_event("info", "lan", f"LAN scan started on {network or 'auto-detect'}")
     result = await scan_network(network=network)
+
+    log_event(
+        "success", "lan",
+        f"LAN scan complete — {result.hosts_up} host(s) found on {result.network} in {result.scan_duration_s}s",
+        {"network": result.network, "hosts_up": result.hosts_up, "duration_s": result.scan_duration_s},
+    )
 
     return {
         "network": result.network,
@@ -50,6 +67,48 @@ async def lan_scan(network: Optional[str] = Query(None, description="CIDR networ
             for h in result.discovered
         ],
     }
+
+
+_last_scan_result: Optional[dict] = None
+
+
+@router.get("/scan/export")
+async def export_scan(network: Optional[str] = Query(None)):
+    """Run a LAN scan and return results as a downloadable JSON file."""
+    if network:
+        try:
+            ipaddress.IPv4Network(network, strict=False)
+        except ValueError:
+            raise HTTPException(status_code=400, detail=f"Invalid CIDR notation: {network}")
+
+    result = await scan_network(network=network)
+    payload = {
+        "exported_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "network": result.network,
+        "hosts_scanned": result.hosts_scanned,
+        "hosts_up": result.hosts_up,
+        "scan_duration_s": result.scan_duration_s,
+        "recommendations": result.recommendations,
+        "hosts": [
+            {
+                "ip": h.ip,
+                "hostname": h.hostname,
+                "open_ports": h.open_ports,
+                "services": [
+                    {"port": s.port, "protocol": s.protocol,
+                     "banner": s.banner, "latency_ms": s.latency_ms}
+                    for s in h.services
+                ],
+                "integration_hints": h.integration_hints,
+            }
+            for h in result.discovered
+        ],
+    }
+    filename = f"warclaw-scan-{result.network.replace('/', '_')}.json"
+    return JSONResponse(
+        content=payload,
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
 
 
 class ModbusScanRequest(BaseModel):

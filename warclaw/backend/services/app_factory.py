@@ -63,10 +63,6 @@ def _extract_artifacts(response: str) -> tuple[Optional[str], Optional[str]]:
     backend = backend_match.group(1).strip() if backend_match else None
     frontend = frontend_match.group(1).strip() if frontend_match else None
 
-    # Strip markdown code fences if present
-    for code_block in (backend, frontend):
-        pass
-
     def strip_fences(code: Optional[str]) -> Optional[str]:
         if not code:
             return code
@@ -83,7 +79,11 @@ async def generate_app(app_name: str, description: str, context: str = "") -> di
     Returns metadata dict with slug, paths, and status.
     """
     slug = _slugify(app_name)
+    # Avoid overwriting an existing app — append a short timestamp suffix
     app_dir = GENERATED_APPS_DIR / slug
+    if app_dir.exists():
+        slug = f"{slug}-{int(time.time()) % 10000}"
+        app_dir = GENERATED_APPS_DIR / slug
     app_dir.mkdir(parents=True, exist_ok=True)
 
     prompt = APP_GENERATION_PROMPT.format(

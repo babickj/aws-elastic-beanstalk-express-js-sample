@@ -32,17 +32,23 @@ LAN_IP=$(hostname -I 2>/dev/null | awk '{print $1}' || echo "localhost")
 # ── Banner ───────────────────────────────────────────────────────
 echo -e "${CYAN}"
 echo "  ╔══════════════════════════════════════════════════════╗"
-echo "  ║          WARCLAW — EdgeRunner AI Naval LAN OS        ║"
+echo "  ║        WARCLAW v2 — EdgeRunner AI Naval LAN OS       ║"
 echo "  ║              100% LOCAL · OFFLINE CAPABLE            ║"
 echo "  ╚══════════════════════════════════════════════════════╝"
 echo -e "${NC}"
 echo -e "  ${GREEN}Dashboard:${NC}   http://${LAN_IP}:${PORT}"
 echo -e "  ${GREEN}API Docs:${NC}    http://${LAN_IP}:${PORT}/api/docs"
+echo -e "  ${GREEN}Mission Log:${NC} http://${LAN_IP}:${PORT}/api/events/"
 echo -e "  ${BLUE}Interface:${NC}   ${HOST}:${PORT}"
 if [ -n "$MODEL" ]; then
   echo -e "  ${GREEN}Model:${NC}       ${MODEL}"
 else
   echo -e "  ${YELLOW}Model:${NC}       Not set — load via Hardware tab in UI"
+fi
+if [ -n "${WARCLAW_API_KEY:-}" ]; then
+  echo -e "  ${GREEN}API Key:${NC}     set — pass as X-API-Key header"
+else
+  echo -e "  ${YELLOW}API Key:${NC}     not set — open LAN access (export WARCLAW_API_KEY to restrict)"
 fi
 echo ""
 

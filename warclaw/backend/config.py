@@ -8,10 +8,15 @@ BASE_DIR = Path(__file__).parent.parent
 MODELS_DIR = BASE_DIR / "models"
 GENERATED_APPS_DIR = BASE_DIR / "generated_apps"
 FRONTEND_DIR = BASE_DIR / "frontend"
+MISSION_LOG_PATH = BASE_DIR / "mission_log.jsonl"
 
 # Server
 HOST = os.getenv("WARCLAW_HOST", "0.0.0.0")
 PORT = int(os.getenv("WARCLAW_PORT", "7070"))
+
+# Security — set WARCLAW_API_KEY to require a key on all API requests.
+# Leave blank (default) for open LAN access.
+API_KEY = os.getenv("WARCLAW_API_KEY", "")
 
 # LLM — model path is set after hardware detection or manually via env
 DEFAULT_MODEL_PATH = os.getenv("WARCLAW_MODEL", "")
@@ -31,4 +36,4 @@ IEC61162_PORTS = [10110, 4001]
 # App branding
 APP_NAME = "WarClaw"
 APP_SUBTITLE = "EdgeRunner AI — Naval LAN Operating System"
-APP_VERSION = "1.0.0"
+APP_VERSION = "2.0.0"

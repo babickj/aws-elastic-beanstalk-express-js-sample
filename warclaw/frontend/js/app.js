@@ -79,6 +79,14 @@ function updateClock() {
   el.textContent = now.toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
 }
 
+// ── Format uptime seconds → human readable ───────────────────────
+function fmtUptime(s) {
+  if (s < 60) return `${s}s`;
+  if (s < 3600) return `${Math.floor(s / 60)}m ${s % 60}s`;
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
+  return `${h}h ${m}m`;
+}
+
 // ── Status polling ───────────────────────────────────────────────
 async function pollStatus() {
   try {
@@ -97,10 +105,39 @@ async function pollStatus() {
       }
     }
 
-    // Update dashboard stats
-    document.getElementById('stat-apps').textContent = status.generated_apps;
-    document.getElementById('stat-model').textContent =
-      status.model_path ? status.model_path.split('/').pop().slice(0, 24) : '—';
+    // Dashboard stats
+    const appsEl = document.getElementById('stat-apps');
+    if (appsEl) appsEl.textContent = status.generated_apps;
+    const modelEl = document.getElementById('stat-model');
+    if (modelEl) modelEl.textContent =
+      status.model_path ? status.model_path.split('/').pop().slice(0, 28) : '— no model loaded';
+
+    // Uptime + version
+    const uptimeEl = document.getElementById('dash-uptime');
+    if (uptimeEl && status.uptime_s != null) uptimeEl.textContent = fmtUptime(status.uptime_s);
+    const verEl = document.getElementById('dash-version');
+    if (verEl && status.version) verEl.textContent = `WarClaw v${status.version}`;
+
+    // CPU / RAM
+    const cpuEl = document.getElementById('dash-cpu');
+    if (cpuEl && status.cpu_percent != null) cpuEl.textContent = `${status.cpu_percent.toFixed(1)}%`;
+    const ramEl = document.getElementById('dash-ram');
+    if (ramEl && status.ram_used_gb != null)
+      ramEl.textContent = `${status.ram_used_gb} / ${status.ram_total_gb} GB (${status.ram_percent}%)`;
+
+    // LAN status pill
+    const lanDot = document.getElementById('lan-status-dot');
+    const lanLabel = document.getElementById('lan-status-label');
+    if (lanDot && lanLabel) {
+      if (State.lanScanResult) {
+        lanDot.className = 'status-dot online';
+        const n = State.lanScanResult.hosts_up;
+        lanLabel.textContent = `LAN ${n} HOST${n !== 1 ? 'S' : ''}`;
+      } else {
+        lanDot.className = 'status-dot';
+        lanLabel.textContent = 'LAN —';
+      }
+    }
 
   } catch (e) {
     const dot = document.getElementById('ai-status-dot');
