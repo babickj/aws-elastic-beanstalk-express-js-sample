@@ -18,7 +18,7 @@ from .config import (
     FRONTEND_DIR, GENERATED_APPS_DIR, MODELS_DIR,
     HOST, PORT, API_KEY
 )
-from .routers import chat, lan, apps, hardware, events
+from .routers import chat, lan, apps, hardware, events, agents
 
 _START_TIME = time.time()
 
@@ -67,6 +67,7 @@ app.include_router(lan.router)
 app.include_router(apps.router)
 app.include_router(hardware.router)
 app.include_router(events.router)
+app.include_router(agents.router)
 
 
 # ── Static frontend ──────────────────────────────────────────────────────────
@@ -85,9 +86,16 @@ async def root():
 
 @app.get("/api/status")
 async def status():
-    """System health check with resource metrics."""
+    """System health check with resource metrics and agent status."""
     from .services.llm import llm_service
+    from .services.agent_engine import agent_engine, AgentStatus
+    from .services.data_bus import data_bus
+    from .services.anomaly import anomaly_detector
+
     vm = psutil.virtual_memory()
+    agents_running = sum(1 for a in agent_engine.agents if a.status == AgentStatus.RUNNING)
+    total_alerts = sum(a.alerts_fired for a in agent_engine.agents)
+
     return {
         "system": APP_NAME,
         "version": APP_VERSION,
@@ -100,6 +108,12 @@ async def status():
         "ram_used_gb": round(vm.used / (1024 ** 3), 2),
         "ram_total_gb": round(vm.total / (1024 ** 3), 2),
         "ram_percent": vm.percent,
+        "agents_total": len(agent_engine.agents),
+        "agents_running": agents_running,
+        "agents_alerts": total_alerts,
+        "data_bus_channels": data_bus.stats["active_channels"],
+        "data_bus_frames": data_bus.stats["total_frames"],
+        "anomalies_detected": anomaly_detector.total_anomalies,
     }
 
 

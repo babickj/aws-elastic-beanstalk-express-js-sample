@@ -139,6 +139,19 @@ async function pollStatus() {
       }
     }
 
+    // Agent stats
+    const agentsRunEl = document.getElementById('dash-agents-running');
+    if (agentsRunEl && status.agents_running != null) agentsRunEl.textContent = status.agents_running;
+    const agentsTotEl = document.getElementById('dash-agents-total');
+    if (agentsTotEl && status.agents_total != null) agentsTotEl.textContent = `${status.agents_total} deployed`;
+
+    // Alerts + anomalies
+    const alertsEl = document.getElementById('dash-alerts');
+    if (alertsEl && status.agents_alerts != null) alertsEl.textContent = status.agents_alerts;
+    const anomEl = document.getElementById('dash-anomalies');
+    if (anomEl && status.anomalies_detected != null)
+      anomEl.textContent = `${status.anomalies_detected} anomalies · ${status.data_bus_frames || 0} bus frames`;
+
   } catch (e) {
     const dot = document.getElementById('ai-status-dot');
     if (dot) dot.className = 'status-dot error';

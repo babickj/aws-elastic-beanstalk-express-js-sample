@@ -36,4 +36,4 @@ IEC61162_PORTS = [10110, 4001]
 # App branding
 APP_NAME = "WarClaw"
 APP_SUBTITLE = "EdgeRunner AI — Naval LAN Operating System"
-APP_VERSION = "2.0.0"
+APP_VERSION = "2.1.0"
