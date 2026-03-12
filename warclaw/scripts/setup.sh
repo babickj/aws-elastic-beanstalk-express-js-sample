@@ -49,6 +49,14 @@ if [ "$MAJOR" -lt 3 ] || [ "$MINOR" -lt 10 ]; then
   exit 1
 fi
 
+# pydantic-core/llama-cpp-python use PyO3, which currently supports up to 3.13.
+# On 3.14+ we set the ABI3 forward-compat flag so they compile without error.
+if [ "$MINOR" -ge 14 ]; then
+  warn "Python $PY_VERSION detected — PyO3-based packages need ABI3 compatibility mode"
+  warn "Setting PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1 for this install"
+  export PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1
+fi
+
 # ── Virtual environment ──────────────────────────────────────────
 section "Virtual Environment"
 if [ ! -d "$VENV_DIR" ]; then
