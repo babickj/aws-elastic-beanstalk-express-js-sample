@@ -446,13 +446,15 @@ label {
 
 /* ── Dashboard ────────────────────────────────────────────────── */
 #view-dashboard .dashboard-grid {
+  flex: 1;               /* fill remaining height inside .view flex column */
+  min-height: 0;         /* allow flex child to shrink so overflow-y works  */
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 14px;
   padding: 24px;
   overflow-y: auto;
-  align-items: start;    /* ← prevents cards stretching to row height */
-  align-content: start;  /* ← rows pack to top, no stretching */
+  align-items: start;    /* prevents cards stretching to row height */
+  align-content: start;  /* rows pack to top, no stretching */
 }
 
 .stat-card {
