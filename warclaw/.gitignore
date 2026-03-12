@@ -23,6 +23,10 @@ generated_apps/*/
 # Logs
 *.log
 logs/
+mission_log.jsonl
+
+# Environment
+.env
 
 # OS
 .DS_Store

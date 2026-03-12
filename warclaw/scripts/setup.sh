@@ -21,7 +21,7 @@ banner() {
   echo "  ██║███╗██║██╔══██║██╔══██╗██║     ██║     ██╔══██║██║███╗██║"
   echo "  ╚███╔███╔╝██║  ██║██║  ██║╚██████╗███████╗██║  ██║╚███╔███╔╝"
   echo "   ╚══╝╚══╝ ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚══════╝╚═╝  ╚═╝ ╚══╝╚══╝"
-  echo -e "${BLUE}  EdgeRunner AI — Naval LAN Operating System v1.0.0${NC}"
+  echo -e "${BLUE}  EdgeRunner AI — Naval LAN Operating System v2.1.0${NC}"
   echo ""
 }
 
@@ -94,7 +94,7 @@ fi
 
 # Install remaining dependencies
 info "Installing remaining dependencies..."
-pip install -r "$REQUIREMENTS" --no-deps -q || pip install -r "$REQUIREMENTS" -q
+pip install -r "$REQUIREMENTS" -q
 
 info "All Python packages installed"
 

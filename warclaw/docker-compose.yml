@@ -1,0 +1,37 @@
+# ═══════════════════════════════════════════════════════════════
+# WarClaw v2.1 — Docker Compose
+#
+# Quick start:
+#   docker compose up --build
+#
+# With a model:
+#   Place a .gguf file in ./models/ then:
+#   WARCLAW_MODEL=/app/models/your-model.gguf docker compose up --build
+# ═══════════════════════════════════════════════════════════════
+services:
+  warclaw:
+    build: .
+    container_name: warclaw
+    restart: unless-stopped
+    ports:
+      - "${WARCLAW_PORT:-7070}:7070"
+    volumes:
+      # Mount models directory so .gguf files persist outside the container
+      - ./models:/app/models
+      # Mount generated_apps so AI-created apps persist
+      - ./generated_apps:/app/generated_apps
+    environment:
+      - WARCLAW_HOST=0.0.0.0
+      - WARCLAW_PORT=7070
+      - WARCLAW_MODEL=${WARCLAW_MODEL:-}
+      - WARCLAW_API_KEY=${WARCLAW_API_KEY:-}
+      - WARCLAW_CTX=${WARCLAW_CTX:-4096}
+      - WARCLAW_THREADS=${WARCLAW_THREADS:-4}
+      - WARCLAW_GPU_LAYERS=${WARCLAW_GPU_LAYERS:-0}
+      - WARCLAW_SCAN_TIMEOUT=${WARCLAW_SCAN_TIMEOUT:-3.0}
+    # For LAN scanning, the container needs host network access.
+    # Uncomment the line below to enable LAN discovery of ship systems:
+    # network_mode: host
+    cap_add:
+      - NET_RAW      # Required for LAN scanning
+      - NET_ADMIN     # Required for network interface enumeration
