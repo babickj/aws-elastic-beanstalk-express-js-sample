@@ -1,8 +1,13 @@
 """WarClaw configuration — all settings derived from environment or defaults."""
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).parent.parent
+
+# Load .env from the warclaw root if present.
+# Variables already in the environment (e.g. docker-compose) take precedence.
+load_dotenv(BASE_DIR / ".env", override=False)
 
 # Paths
 MODELS_DIR = BASE_DIR / "models"

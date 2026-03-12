@@ -19,6 +19,14 @@ fi
 
 source "$VENV_DIR/bin/activate"
 
+# ── Load .env if present (allows simple config without exporting vars) ──
+if [ -f "$WARCLAW_DIR/.env" ]; then
+  set -o allexport
+  # shellcheck source=/dev/null
+  source "$WARCLAW_DIR/.env"
+  set +o allexport
+fi
+
 # ── Configuration from env or defaults ──────────────────────────
 HOST="${WARCLAW_HOST:-0.0.0.0}"
 PORT="${WARCLAW_PORT:-7070}"

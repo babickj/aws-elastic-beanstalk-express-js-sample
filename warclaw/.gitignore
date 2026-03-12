@@ -25,6 +25,9 @@ generated_apps/*/
 logs/
 mission_log.jsonl
 
+# Runtime state
+agents.json
+
 # Environment
 .env
 

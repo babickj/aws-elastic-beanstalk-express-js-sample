@@ -20,9 +20,11 @@ from enum import Enum
 from pathlib import Path
 from typing import Optional
 
-from ..config import GENERATED_APPS_DIR
+from ..config import BASE_DIR, GENERATED_APPS_DIR
 from .data_bus import DataBus, DataFrame, data_bus
 from .mission_log import emit as log_event
+
+AGENTS_STATE_PATH = BASE_DIR / "agents.json"
 
 log = logging.getLogger("warclaw.agent_engine")
 
@@ -188,6 +190,64 @@ class AgentEngine:
 
     def __init__(self):
         self._agents: dict[str, Agent] = {}
+        self._load_state()
+
+    # ── Persistence ──────────────────────────────────────────────────────
+
+    def _save_state(self) -> None:
+        """Persist non-running agent definitions to agents.json."""
+        try:
+            data = []
+            for agent in self._agents.values():
+                # Only save agents that should survive a restart (not errored)
+                if agent.status == AgentStatus.ERROR:
+                    continue
+                data.append({
+                    "id": agent.id,
+                    "agent_type": agent.agent_type,
+                    "name": agent.name,
+                    "description": agent.description,
+                    "icon": agent.icon,
+                    "category": agent.category,
+                    "priority": agent.priority,
+                    "target_host": agent.target_host,
+                    "target_port": agent.target_port,
+                    "channel": agent.channel,
+                    "config": agent.config,
+                    "created_at": agent.created_at,
+                    # Restore as STOPPED so operator re-starts intentionally
+                    "status": AgentStatus.STOPPED.value,
+                })
+            AGENTS_STATE_PATH.write_text(json.dumps(data, indent=2))
+        except Exception as e:
+            log.warning("Failed to save agent state: %s", e)
+
+    def _load_state(self) -> None:
+        """Restore agent definitions from agents.json on startup."""
+        if not AGENTS_STATE_PATH.exists():
+            return
+        try:
+            data = json.loads(AGENTS_STATE_PATH.read_text())
+            for entry in data:
+                agent = Agent(
+                    id=entry["id"],
+                    agent_type=entry["agent_type"],
+                    name=entry["name"],
+                    description=entry["description"],
+                    icon=entry["icon"],
+                    category=entry["category"],
+                    priority=entry["priority"],
+                    status=AgentStatus.STOPPED,
+                    target_host=entry["target_host"],
+                    target_port=entry["target_port"],
+                    channel=entry["channel"],
+                    config=entry.get("config", {}),
+                    created_at=entry.get("created_at", time.time()),
+                )
+                self._agents[agent.id] = agent
+            log.info("Restored %d agent(s) from state file", len(data))
+        except Exception as e:
+            log.warning("Failed to load agent state: %s", e)
 
     @property
     def agents(self) -> list[Agent]:
@@ -314,6 +374,7 @@ class AgentEngine:
         )
 
         self._agents[agent_id] = agent
+        self._save_state()
         log_event("success", "system",
                   f"Agent deployed: {agent.name} → {target_host}:{target_port}",
                   {"agent_id": agent_id, "type": agent_type})
@@ -356,6 +417,7 @@ class AgentEngine:
 
         agent.status = AgentStatus.STOPPED
         agent.stopped_at = time.time()
+        self._save_state()
 
         log_event("info", "system",
                   f"Agent stopped: {agent.name}",
@@ -371,6 +433,7 @@ class AgentEngine:
         if agent.status == AgentStatus.RUNNING:
             raise ValueError("Cannot remove a running agent — stop it first")
         del self._agents[agent_id]
+        self._save_state()
         return True
 
     async def _run_agent(self, agent: Agent) -> None:
