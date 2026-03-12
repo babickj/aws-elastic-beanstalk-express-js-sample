@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WarClaw — Autonomous Intelligence for Maritime Systems</title>
+  <title>WarClaw — EdgeRunner AI · Autonomous Intelligence for Maritime Systems</title>
   <link rel="stylesheet" href="/static/css/app.css" />
 </head>
 <body>
@@ -14,8 +14,8 @@
   <header id="header">
     <div class="logo-mark">
       <!-- EdgeRunner AI wordmark -->
-      <img src="/static/img/logo.svg" alt="EdgeRunner AI" style="height:32px;width:auto;filter:drop-shadow(0 0 6px rgba(204,43,43,0.4));" />
-      <div class="header-divider" style="margin-left:4px;"></div>
+      <img src="/static/img/logo.svg" alt="EdgeRunner AI" style="height:34px;width:auto;filter:drop-shadow(0 0 8px rgba(232,64,28,0.5));" />
+      <div class="header-divider" style="margin-left:6px;"></div>
       <div class="logo-text">
         <div class="logo-name">WARCLAW</div>
         <div class="logo-brand">Autonomous Intelligence for Maritime Systems</div>
@@ -42,8 +42,9 @@
   <!-- ══ NO-MODEL BANNER ══════════════════════════════════════════ -->
   <div id="setup-banner">
     <span class="setup-banner-icon">⚡</span>
-    <span>No AI model loaded — WarClaw's intelligence is offline. Load a GGUF model to enable AI Assistant, App Factory, and smart recommendations.</span>
-    <button class="setup-banner-btn" onclick="showView('hardware')">Load Model →</button>
+    <strong style="margin-right:4px;">Step 1 of 1:</strong>
+    <span>No AI model loaded — AI Assistant, App Factory, and smart agent recommendations are offline until you load a GGUF model.</span>
+    <button class="setup-banner-btn" onclick="showView('hardware')">⚙ Load AI Model →</button>
   </div>
 
   <!-- ══ SIDEBAR ═════════════════════════════════════════════════ -->
@@ -95,7 +96,7 @@
     <div id="sidebar-footer">
       <div class="sidebar-footer-text">
         WarClaw v2.1.0<br>
-        EdgeRunner AI<br>
+        <span style="color:var(--accent);letter-spacing:1px;">EdgeRunner AI</span><br>
         100% LOCAL · NO CLOUD
       </div>
     </div>
@@ -174,14 +175,42 @@
           </div>
         </div>
 
+        <!-- Getting Started -->
+        <div class="card" style="grid-column: 1 / -1;">
+          <div class="card-title">Getting Started</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:8px;">
+            <div style="display:flex;gap:12px;align-items:flex-start;">
+              <div style="width:28px;height:28px;border-radius:50%;background:rgba(232,64,28,0.15);border:1px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--accent);flex-shrink:0;">1</div>
+              <div>
+                <div style="font-size:12px;font-weight:600;color:var(--text-primary);margin-bottom:3px;">Load an AI Model</div>
+                <div style="font-size:11px;color:var(--text-muted);line-height:1.6;">Go to <strong style="color:var(--text-secondary);cursor:pointer;" onclick="showView('hardware')">Hardware / Model</strong> and load a GGUF file to activate AI features.</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:12px;align-items:flex-start;">
+              <div style="width:28px;height:28px;border-radius:50%;background:rgba(232,64,28,0.08);border:1px solid var(--border-bright);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--text-muted);flex-shrink:0;">2</div>
+              <div>
+                <div style="font-size:12px;font-weight:600;color:var(--text-primary);margin-bottom:3px;">Scan the Ship's LAN</div>
+                <div style="font-size:11px;color:var(--text-muted);line-height:1.6;">Use <strong style="color:var(--text-secondary);cursor:pointer;" onclick="showView('lan');runLanScan()">LAN Monitor</strong> to discover NMEA, MODBUS, and HTTP devices on this network.</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:12px;align-items:flex-start;">
+              <div style="width:28px;height:28px;border-radius:50%;background:rgba(232,64,28,0.08);border:1px solid var(--border-bright);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--text-muted);flex-shrink:0;">3</div>
+              <div>
+                <div style="font-size:12px;font-weight:600;color:var(--text-primary);margin-bottom:3px;">Deploy Agents &amp; Build Apps</div>
+                <div style="font-size:11px;color:var(--text-muted);line-height:1.6;">Auto-deploy monitoring <strong style="color:var(--text-secondary);cursor:pointer;" onclick="showView('agents')">Agents</strong>, then use <strong style="color:var(--text-secondary);cursor:pointer;" onclick="showView('apps')">App Factory</strong> to generate ship dashboards with AI.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- System Overview -->
         <div class="card" style="grid-column: 1 / -1;">
-          <div class="card-title">About WarClaw</div>
+          <div class="card-title">About WarClaw · EdgeRunner AI</div>
           <div style="font-size:12px;color:var(--text-secondary);line-height:1.9;">
-            <div style="margin-bottom:4px;">▶ <strong style="color:var(--text-primary);">100% offline</strong> — runs entirely on this ship's LAN. No internet connection, no telemetry, no cloud.</div>
-            <div style="margin-bottom:4px;">▶ <strong style="color:var(--text-primary);">AI inference</strong> is powered by llama.cpp — all data stays on this server.</div>
-            <div style="margin-bottom:4px;">▶ <strong style="color:var(--text-primary);">LAN monitoring</strong> covers NMEA 0183, IEC 61162-450, MODBUS TCP, and generic TCP services.</div>
-            <div>▶ <strong style="color:var(--text-primary);">Generated apps</strong> run as live routes accessible to every terminal on the LAN.</div>
+            <div style="margin-bottom:4px;">▶ <strong style="color:var(--text-primary);">100% air-gapped</strong> — runs entirely on this ship's LAN. No internet, no telemetry, no cloud dependency.</div>
+            <div style="margin-bottom:4px;">▶ <strong style="color:var(--text-primary);">Local AI inference</strong> powered by llama.cpp — all data stays on this server, all processing stays on this hardware.</div>
+            <div style="margin-bottom:4px;">▶ <strong style="color:var(--text-primary);">Protocol support</strong> covers NMEA 0183, IEC 61162-450, MODBUS TCP, and generic TCP/HTTP services.</div>
+            <div>▶ <strong style="color:var(--text-primary);">Generated apps</strong> run as live routes instantly accessible to every terminal on the LAN — no deployment required.</div>
           </div>
         </div>
 
@@ -241,9 +270,10 @@
           <div id="lan-host-list" style="padding:0 16px 16px;display:flex;flex-direction:column;gap:10px;">
             <div class="empty-state" id="lan-empty">
               <div class="empty-icon">⊕</div>
-              <div class="empty-title">No hosts discovered yet</div>
-              <div class="empty-sub">Scan the ship's LAN to find NMEA navigation systems, MODBUS sensors, and other connected equipment.</div>
-              <button class="btn btn-primary" style="margin-top:8px;" onclick="runLanScan()">⊕ Start LAN Scan</button>
+              <div class="empty-title">Ready to scan</div>
+              <div class="empty-sub">Discover NMEA navigation systems, MODBUS sensors, IEC 61162 bridge systems, and HTTP interfaces on this network.</div>
+              <button class="btn btn-primary" style="margin-top:12px;padding:8px 20px;" onclick="runLanScan()">⊕ Scan Ship LAN</button>
+              <div style="font-size:10px;color:var(--text-muted);margin-top:8px;letter-spacing:0.5px;">Auto-detects subnet · typically takes 10–30 seconds</div>
             </div>
           </div>
         </div>
@@ -326,7 +356,7 @@
           <div class="empty-state" id="apps-empty">
             <div class="empty-icon">⬡</div>
             <div class="empty-title">No apps generated yet</div>
-            <div class="empty-sub">Describe a ship application on the left and AI will build and deploy it as a live web app on this server.</div>
+            <div class="empty-sub">Describe a ship application on the left — navigation dashboard, sensor viewer, AIS tracker — and AI builds and deploys it in seconds.</div>
           </div>
         </div>
 
@@ -377,7 +407,7 @@
             <div class="empty-state" style="height:200px;">
               <div class="empty-icon">◉</div>
               <div class="empty-title">No recommendations yet</div>
-              <div class="empty-sub">Run Auto-Recommend to scan the LAN</div>
+              <div class="empty-sub">Click <strong>Auto-Recommend</strong> — WarClaw scans the LAN and suggests agents matched to your ship's systems.</div>
             </div>
           </div>
         </div>
@@ -389,8 +419,9 @@
             <div class="empty-state" style="height:240px;">
               <div class="empty-icon">◉</div>
               <div class="empty-title">No agents deployed</div>
-              <div class="empty-sub">Agents continuously monitor ship systems, fire alerts on anomalies, and log protocol data.</div>
-              <button class="btn btn-primary" style="margin-top:8px;" onclick="autoRecommend()">◉ Auto-Recommend Agents</button>
+              <div class="empty-sub">Agents run 24/7 — monitoring NMEA feeds, MODBUS registers, and network activity. They alert on anomalies and log all events.</div>
+              <button class="btn btn-primary" style="margin-top:12px;padding:8px 20px;" onclick="autoRecommend()">◉ Auto-Recommend Agents</button>
+              <div style="font-size:10px;color:var(--text-muted);margin-top:8px;letter-spacing:0.5px;">Requires a LAN scan first</div>
             </div>
           </div>
         </div>

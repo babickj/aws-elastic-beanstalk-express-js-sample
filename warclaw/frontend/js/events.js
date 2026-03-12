@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `warclaw-mission-log-${Date.now()}.json`;
+        a.download = `edgerunner-warclaw-mission-log-${Date.now()}.json`;
         a.click();
         URL.revokeObjectURL(url);
       } catch (e) {

@@ -203,12 +203,13 @@ function initChat() {
   // Welcome message (not added to history)
   setTimeout(() => {
     appendMessage('assistant',
-      'WARCLAW AI ONLINE — EdgeRunner Naval LAN OS\n\n' +
+      'WarClaw AI — EdgeRunner · Autonomous Intelligence for Maritime Systems\n\n' +
       'I can help you:\n' +
-      '• Analyze and monitor systems on the ship LAN\n' +
-      '• Parse NMEA, MODBUS, and IEC 61162 data\n' +
-      '• Generate full-stack applications for ship operations\n\n' +
-      'Load a GGUF model in the Hardware tab to begin, or ask me anything.'
+      '• Analyze and monitor systems discovered on the ship LAN\n' +
+      '• Parse and explain NMEA 0183, MODBUS, and IEC 61162 data\n' +
+      '• Generate full-stack ship applications on demand\n' +
+      '• Recommend agents and integrations based on your network\n\n' +
+      'If I appear offline, load a GGUF model under ⚙ Hardware / Model first.'
     );
   }, 300);
 
